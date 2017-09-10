@@ -18,7 +18,7 @@ def basicUnitTest():
     packet3.securityAnswer = 'Windsor, CT'
     packet3Bytes = packet3._serialize_()
     packet3Test = Packets.SecurityAnswerPacket.Deserialize(packet3Bytes)
-    assert packet4 == packet3Test
+    assert packet3 == packet3Test
 
     packet4 = Packets.ForgotPasswordTokenPacket()
     packet4.token = 'asdf2313241SqwerXq'
