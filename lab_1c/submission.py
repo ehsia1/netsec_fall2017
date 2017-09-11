@@ -1,4 +1,5 @@
-import '../lab_1b/Packets'
+import asyncio
+import Protocol
 
 def basicUnitTest():
 
