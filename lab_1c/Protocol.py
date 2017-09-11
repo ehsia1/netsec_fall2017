@@ -1,8 +1,6 @@
 import asyncio
 import ../lab_1b/Packets
 from playground.network.packet import PacketType
-from playground.asyncio_lib.testing import TestLoopEx
-from playground.network.testing import MockTransportToStorageStream, MockTransportToProtocol
 
 Protocol = asyncio.Protocol
 
