@@ -49,8 +49,12 @@ class ForgotPasswordClientProtocol(Protocol):
         self.deserializer = PacketType.Deserializer()
 
     def connection_made(self, transport):
-        print("Echo server connected to client.")
+        print("Echo client connected to server.")
         self.transport = transport
+        packet1 = Packets.RequestForgotPasswordPacket()
+        packet1.userId = 'ehsia1'
+        packet1Bytes = packet1.__serialize__()
+        self.transport.write(packet1Bytes)
 
     def dataReceived(self, data):
         print("Receiving packet")
