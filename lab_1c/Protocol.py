@@ -1,5 +1,6 @@
 import asyncio
 import Packets
+import re
 from playground.network.packet import PacketType
 
 Protocol = asyncio.Protocol
@@ -23,10 +24,14 @@ class ForgotPasswordServerProtocol(Protocol):
             packet2Bytes = packet2.__serialize__()
             self.transport.write(packet2Bytes)
         elif isinstance(packet, Packets.SecurityAnswerPacket):
-            packet4 = Packets.ForgotPasswordTokenPacket()
-            packet4.token = 'asdf2313241SqwerXq'
-            packet4Bytes = packet4.__serialize__()
-            self.transport.write(packet4Bytes)
+            if re.match(r'(.*), [A-Z]{2}$', packet.securityAnswer, flags=0):
+                packet4 = Packets.ForgotPasswordTokenPacket()
+                packet4.token = 'asdf2313241SqwerXq'
+                packet4Bytes = packet4.__serialize__()
+                self.transport.write(packet4Bytes)
+            else:
+                print("Answer was of invalid format, must be of form '[town], [stateAbbreviation]'")
+                self.transport.close()
         elif isinstance(packet, Packets.ResetPasswordInputPacket):
             packet6 = Packets.PasswordResetPacket()
             if packet.newPassword == packet.passwordConfirmation:
@@ -60,6 +65,9 @@ class ForgotPasswordClientProtocol(Protocol):
 
 
     def data_received(self, data):
+        print("Receiving packet")
+        self.deserializer.update(data)
+        packet = PacketType.Deserialize(data)
         def clientInput(packet):
             if isinstance(packet, Packets.SecurityQuestionPacket):
                 packet3 = Packets.SecurityAnswerPacket()
@@ -72,9 +80,6 @@ class ForgotPasswordClientProtocol(Protocol):
                 packet5.passwordConfirmation = input("Enter password again: ")
                 packet5Bytes = packet5.__serialize__()
                 return packet5Bytes
-        print("Receiving packet")
-        self.deserializer.update(data)
-        packet = PacketType.Deserialize(data)
         if isinstance(packet, Packets.SecurityQuestionPacket):
             response = clientInput(packet)
             self.transport.write(response)
@@ -91,6 +96,6 @@ class ForgotPasswordClientProtocol(Protocol):
             print("Packet was not recognized by client. Closing socket")
             self.transport.close()
 
-    def connection_lost(self, exc):
+    def connection_lost(self):
         print("Echo client connection lost")
         self.transport = None
