@@ -5,7 +5,6 @@ from playground.network.packet import PacketType
 Protocol = asyncio.Protocol
 
 class ForgotPasswordServerProtocol(Protocol):
-    packetCount = 0
     def __init__(self):
         self.transport = None
         self.deserializer = PacketType.Deserializer()
@@ -14,21 +13,18 @@ class ForgotPasswordServerProtocol(Protocol):
         print("Echo server connected to client.")
         self.transport = transport
 
-    def data_received(self, packet):
+    def data_received(self, data):
         print("Receiving packet")
-        self.deserializer.update(packet)
-        packetCount += 1
-        if isinstance(packet, Packets.RequestForgotPasswordPacket()):
-            print("packet")
-        elif isinstance(packet, Packets.SecurityAnswerPacket()):
-            print("packet")
-        elif isinstance(packet, Packets.ResetPasswordInputPacket()):
-            print("packet")
+        self.deserializer.update(data)
+        packet = PacketType.Deserialize(data)
+        if isinstance(packet, Packets.RequestForgotPasswordPacket):
+            print("packet1")
+        elif isinstance(packet, Packets.SecurityAnswerPacket):
+            print("packet3")
+        elif isinstance(packet, Packets.ResetPasswordInputPacket):
+            print("packet5")
         else:
             print("Packet was not recognized by server. Closing socket")
-            self.transport.close()
-        if packetCount == 6:
-            print("Closing the socket")
             self.transport.close()
 
     def connection_lost(self, exc):
@@ -44,22 +40,20 @@ class ForgotPasswordClientProtocol(Protocol):
         print("Echo server connected to client.")
         self.transport = transport
 
-    def data_received(self, packet):
+    def data_received(self, data):
         print("Receiving packet")
-        self.deserializer.update(packet)
-        packetCount += 1
-        if isinstance(packet, Packets.SecurityQuestionPacket()):
-            print("packet")
-        elif isinstance(packet, Packets.ForgotPasswordTokenPacket()):
-            print("packet")
-        elif isinstance(packet, Packets.PasswordResetPacket()):
-            print("packet")
+        self.deserializer.update(data)
+        packet = PacketType.Deserialize(data)
+        if isinstance(packet, Packets.SecurityQuestionPacket):
+            print("packet2")
+        elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
+            print("packet4")
+        elif isinstance(packet, Packets.PasswordResetPacket):
+            print("packet6")
         else:
             print("Packet was not recognized by client. Closing socket")
             self.transport.close()
-        if packetCount == 6:
-            print("Closing the socket")
-            self.transport.close()
+
 
     def connection_lost(self, exc):
         print("Echo client connection lost because {}".format(exc))
