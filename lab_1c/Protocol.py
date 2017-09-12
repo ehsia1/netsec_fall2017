@@ -34,7 +34,7 @@ class ForgotPasswordServerProtocol(Protocol):
             else:
                 packet6.verification = False
             packet6Bytes = packet6.__serialize__()
-            self.transport.write(data)
+            self.transport.write(packet6Bytes)
         else:
             print("Packet was not recognized by server. Closing socket")
             self.transport.close()
