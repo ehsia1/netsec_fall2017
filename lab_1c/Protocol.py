@@ -13,7 +13,7 @@ class ForgotPasswordServerProtocol(Protocol):
         print("Echo server connected to client.")
         self.transport = transport
 
-    def dataReceived(self, data):
+    def data_received(self, data):
         print("Receiving packet")
         self.deserializer.update(data)
         packet = PacketType.Deserialize(data)
@@ -56,7 +56,7 @@ class ForgotPasswordClientProtocol(Protocol):
         packet1Bytes = packet1.__serialize__()
         self.transport.write(packet1Bytes)
 
-    def dataReceived(self, data):
+    def data_received(self, data):
         print("Receiving packet")
         self.deserializer.update(data)
         packet = PacketType.Deserialize(data)
