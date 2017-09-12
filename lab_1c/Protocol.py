@@ -19,11 +19,14 @@ class ForgotPasswordServerProtocol(Protocol):
         self.deserializer.update(data)
         packet = PacketType.Deserialize(data)
         if isinstance(packet, Packets.RequestForgotPasswordPacket):
+            # Validation limited because there does not exist a database of valid userIds (same with security q/a)
             packet2 = Packets.SecurityQuestionPacket()
             packet2.securityQuestion = 'What was your hometown?'
             packet2Bytes = packet2.__serialize__()
             self.transport.write(packet2Bytes)
         elif isinstance(packet, Packets.SecurityAnswerPacket):
+            # Validate the answer of the hometown Security Question for format
+            # Expecting format of {Town}, {stateAbbreviation} such as 'Windsor, CT'
             if re.match(r'(.*), [A-Z]{2}$', packet.securityAnswer, flags=0):
                 packet4 = Packets.ForgotPasswordTokenPacket()
                 packet4.token = 'asdf2313241SqwerXq'
@@ -59,7 +62,7 @@ class ForgotPasswordClientProtocol(Protocol):
         print("Echo client connected to server.")
         self.transport = transport
         packet1 = Packets.RequestForgotPasswordPacket()
-        packet1.userId = 'ehsia1'
+        packet1.userId = input("Input username associated with account: ")
         packet1Bytes = packet1.__serialize__()
         self.transport.write(packet1Bytes)
 
