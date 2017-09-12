@@ -64,10 +64,11 @@ class ForgotPasswordClientProtocol(Protocol):
     def connection_made(self, transport):
         print("Echo client connected to server.")
         self.transport = transport
+
+    def send_initial_message(self):
         packet1 = Packets.RequestForgotPasswordPacket()
         message = self.clientInput(packet1)
         self.transport.write(message)
-
 
     def data_received(self, data):
         print("Receiving packet")
