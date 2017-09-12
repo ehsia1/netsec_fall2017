@@ -34,13 +34,13 @@ class ForgotPasswordServerProtocol(Protocol):
             else:
                 packet6.verification = False
             packet6Bytes = packet6.__serialize__()
-            self.transport.write(packet6Bytes)
+            self.transport.write(data)
         else:
             print("Packet was not recognized by server. Closing socket")
             self.transport.close()
 
-    def connection_lost(self, exc):
-        print("Echo server connection lost because {}".format(exc))
+    def connection_lost(self):
+        print("Echo server connection lost because packet was not recognized")
         self.transport = None
 
 class ForgotPasswordClientProtocol(Protocol):
@@ -80,6 +80,6 @@ class ForgotPasswordClientProtocol(Protocol):
             print("Packet was not recognized by client. Closing socket")
             self.transport.close()
 
-    def connection_lost(self, exc):
-        print("Echo client connection lost because {}".format(exc))
+    def connection_lost(self):
+        print("Echo client connection lost because packet was not recognized")
         self.transport = None
