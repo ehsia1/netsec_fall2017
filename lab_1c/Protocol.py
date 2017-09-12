@@ -30,8 +30,10 @@ class ForgotPasswordServerProtocol(Protocol):
         elif isinstance(packet, Packets.ResetPasswordInputPacket):
             packet6 = Packets.PasswordResetPacket()
             if packet.newPassword == packet.passwordConfirmation:
+                print("Passwords matched!")
                 packet6.verification = True
             else:
+                print("Passwords did not match!")
                 packet6.verification = False
             packet6Bytes = packet6.__serialize__()
             self.transport.write(packet6Bytes)
@@ -40,7 +42,7 @@ class ForgotPasswordServerProtocol(Protocol):
             self.transport.close()
 
     def connection_lost(self):
-        print("Echo server connection lost because packet was not recognized")
+        print("Echo server connection lost")
         self.transport = None
 
 class ForgotPasswordClientProtocol(Protocol):
@@ -56,30 +58,39 @@ class ForgotPasswordClientProtocol(Protocol):
         packet1Bytes = packet1.__serialize__()
         self.transport.write(packet1Bytes)
 
+
     def data_received(self, data):
+        def clientInput(packet):
+            if isinstance(packet, Packets.SecurityQuestionPacket):
+                packet3 = Packets.SecurityAnswerPacket()
+                packet3.securityAnswer = input("Input answer to security question: ")
+                packet3Bytes = packet3.__serialize__()
+                return packet3Bytes
+            elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
+                packet5 = Packets.ResetPasswordInputPacket()
+                packet5.newPassword = input("Enter your new password: ")
+                packet5.passwordConfirmation = input("Enter password again: ")
+                packet5Bytes = packet5.__serialize__()
+                return packet5Bytes
         print("Receiving packet")
         self.deserializer.update(data)
         packet = PacketType.Deserialize(data)
         if isinstance(packet, Packets.SecurityQuestionPacket):
-            packet3 = Packets.SecurityAnswerPacket()
-            packet3.securityAnswer = 'Windsor, CT'
-            packet3Bytes = packet3.__serialize__()
-            self.transport.write(packet3Bytes)
+            response = clientInput(packet)
+            self.transport.write(response)
         elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
-            packet5 = Packets.ResetPasswordInputPacket()
-            packet5.newPassword = 'gronkgronkgronk'
-            packet5.passwordConfirmation = 'gronkgronkgronk'
-            packet5Bytes = packet5.__serialize__()
-            self.transport.write(packet5Bytes)
+            response = clientInput(packet)
+            self.transport.write(response)
         elif isinstance(packet, Packets.PasswordResetPacket):
             if packet.verification == True:
                 print("Password Reset!")
             else:
                 print("Password Reset Failed!")
+            self.transport.close()
         else:
             print("Packet was not recognized by client. Closing socket")
             self.transport.close()
 
-    def connection_lost(self):
-        print("Echo client connection lost because packet was not recognized")
+    def connection_lost(self, exc):
+        print("Echo client connection lost")
         self.transport = None
