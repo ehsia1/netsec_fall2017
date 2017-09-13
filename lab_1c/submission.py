@@ -5,14 +5,17 @@ from playground.network.testing import MockTransportToStorageStream, MockTranspo
 def basicUnitTest():
     client = Protocol.ForgotPasswordClientProtocol()
     server = Protocol.ForgotPasswordServerProtocol()
-    transportToClient = MockTransportToProtocol(myProtocol=client)
-    transportToServer = MockTransportToProtocol(myProtocol=server)
-    transportToServer.setRemoteTransport(transportToClient)
-    transportToClient.setRemoteTransport(transportToServer)
+    cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
 
-    server.connection_made(transportToClient)
-    client.connection_made(transportToServer)
+    server.connection_made(sTransport)
+    client.connection_made(cTransport)
     client.send_initial_message()
+
+    # packet1 = Packets.RequestForgotPasswordPacket()
+    # packet1.userId = 'ehsia1'
+    # packet1Bytes = packet1.__serialize__()
+    # sResponse1 = server.data_received(packet1Bytes)
+    # assert isinstance(packet2, Packets.SecurityQuestionPacket)
 
     print("Protocol completed!")
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ class ForgotPasswordServerProtocol(Protocol):
                 packet2.securityQuestion = 'What was your hometown?'
                 packet2Bytes = packet2.__serialize__()
                 self.transport.write(packet2Bytes)
+                # return packet2
             elif isinstance(packet, Packets.SecurityAnswerPacket):
                 # Validate the answer of the hometown Security Question for format
                 # Expecting format of {Town}, {stateAbbreviation} such as 'Windsor, CT'
@@ -34,9 +35,6 @@ class ForgotPasswordServerProtocol(Protocol):
                     self.transport.write(packet4Bytes)
                 else:
                     print("Answer was of invalid format, must be of form '[town], [stateAbbreviation]'")
-                    # packet4 = Packets.SecurityQuestionPacket()
-                    # packet4.securityQuestion = 'What was your hometown?'
-                    # packet4Bytes = packet4.__serialize__()
                     self.transport.close()
             elif isinstance(packet, Packets.ResetPasswordInputPacket):
                 packet6 = Packets.PasswordResetPacket()
@@ -52,7 +50,7 @@ class ForgotPasswordServerProtocol(Protocol):
                 print("Packet was not recognized by server. Closing socket")
                 self.transport.close()
 
-    def connection_lost(self):
+    def connection_lost(self, exc):
         print("Echo server connection lost")
         self.transport = None
 
@@ -109,6 +107,6 @@ class ForgotPasswordClientProtocol(Protocol):
             packetBytes = packet.__serialize__()
             return packetBytes
 
-    def connection_lost(self):
+    def connection_lost(self, exc):
         print("Echo client connection lost")
         self.transport = None
