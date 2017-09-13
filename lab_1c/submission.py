@@ -12,6 +12,7 @@ def basicUnitTest():
 
     server.connection_made(transportToClient)
     client.connection_made(transportToServer)
+    client.send_initial_message()
 
     print("Protocol completed!")
 if __name__ == "__main__":
