@@ -75,9 +75,11 @@ class ForgotPasswordClientProtocol(Protocol):
         self.deserializer.update(data)
         for packet in self.deserializer.nextPackets():
             if isinstance(packet, Packets.SecurityQuestionPacket):
+                print(packet.securityQuestion)
                 response = self.clientInput(packet)
                 self.transport.write(response)
             elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
+                print("Security Question Correct, here's your token", packet.token)
                 response = self.clientInput(packet)
                 self.transport.write(response)
             elif isinstance(packet, Packets.PasswordResetPacket):
@@ -92,15 +94,16 @@ class ForgotPasswordClientProtocol(Protocol):
 
     def clientInput(self, packet):
         if isinstance(packet, Packets.SecurityQuestionPacket):
-            packet = Packets.SecurityAnswerPacket()
-            packet.securityAnswer = input("Input answer to security question: ")
-            packetBytes = packet.__serialize__()
-            return packetBytes
+            packetNew = Packets.SecurityAnswerPacket()
+            packetNew.securityAnswer = input("Input answer to security question: ")
+            packetNewBytes = packetNew.__serialize__()
+            return packetNewBytes
         elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
-            packet.newPassword = input("Enter your new password: ")
-            packet.passwordConfirmation = input("Enter password again: ")
-            packetBytes = packet.__serialize__()
-            return packetBytes
+            packetNew = Packets.ResetPasswordInputPacket()
+            packetNew.newPassword = input("Enter your new password: ")
+            packetNew.passwordConfirmation = input("Enter password again: ")
+            packetNewBytes = packetNew.__serialize__()
+            return packetNewBytes
         elif isinstance(packet, Packets.RequestForgotPasswordPacket):
             packet.userId = input("Input username associated with account: ")
             packetBytes = packet.__serialize__()
