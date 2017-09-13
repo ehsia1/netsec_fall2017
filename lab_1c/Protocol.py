@@ -23,8 +23,8 @@ class ForgotPasswordServerProtocol(Protocol):
                 packet2 = Packets.SecurityQuestionPacket()
                 packet2.securityQuestion = 'What was your hometown?'
                 packet2Bytes = packet2.__serialize__()
+                return packet2
                 self.transport.write(packet2Bytes)
-                # return packet2
             elif isinstance(packet, Packets.SecurityAnswerPacket):
                 # Validate the answer of the hometown Security Question for format
                 # Expecting format of {Town}, {stateAbbreviation} such as 'Windsor, CT'
@@ -32,9 +32,11 @@ class ForgotPasswordServerProtocol(Protocol):
                     packet4 = Packets.ForgotPasswordTokenPacket()
                     packet4.token = 'asdf2313241SqwerXq'
                     packet4Bytes = packet4.__serialize__()
+                    return packet4
                     self.transport.write(packet4Bytes)
                 else:
                     print("Answer was of invalid format, must be of form '[town], [stateAbbreviation]'")
+                    return "Invalid"
                     self.transport.close()
             elif isinstance(packet, Packets.ResetPasswordInputPacket):
                 packet6 = Packets.PasswordResetPacket()
@@ -45,6 +47,7 @@ class ForgotPasswordServerProtocol(Protocol):
                     print("Passwords did not match!")
                     packet6.verification = False
                 packet6Bytes = packet6.__serialize__()
+                return packet6
                 self.transport.write(packet6Bytes)
             else:
                 print("Packet was not recognized by server. Closing socket")
@@ -75,10 +78,12 @@ class ForgotPasswordClientProtocol(Protocol):
             if isinstance(packet, Packets.SecurityQuestionPacket):
                 print(packet.securityQuestion)
                 response = self.clientInput(packet)
+                return response
                 self.transport.write(response)
             elif isinstance(packet, Packets.ForgotPasswordTokenPacket):
                 print("Security Question Correct, here's your token", packet.token)
                 response = self.clientInput(packet)
+                return response
                 self.transport.write(response)
             elif isinstance(packet, Packets.PasswordResetPacket):
                 if packet.verification == True:
