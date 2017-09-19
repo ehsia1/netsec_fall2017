@@ -22,8 +22,8 @@ class PassThrough2(StackingProtocol):
 
     def connection_made(self, transport):
         self.transport = transport
-        print("Connection made to Client")
         self.higherProtocol().connection_made(StackingTransport(transport))
+        print("Connection made to Client")
 
     def data_received(self, data):
         self.higherProtocol().data_received(data)
