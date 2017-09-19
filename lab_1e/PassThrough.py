@@ -1,34 +1,30 @@
 import Protocol
 import playground
-from playground.network.common import StackingProtocol
+from playground.network.common import StackingProtocol, StackingTransport
 
 class PassThrough1(StackingProtocol):
     def __init__(self):
         self.transport = None
         self.count = 0
 
-    def setHigherProtocol(self, higherProtocol=Protocol.ForgotPasswordServerProtocol()):
-        self._higherProtocol = higherProtocol
-        if self.count == 0:
-            self.higherProtocol().connection_made()
-            print("Connection made.")
-        elif self.count < 3:
-            self.higherProtocol().data_received()
-        else:
-            self.higherProtocol().connection_lost()
-        self.count += 1
+    def connection_made(self, transport):
+        self.transport = transport
+        self.higherProtocol().connection_made(StackingTransport(transport))
+        print("Connection Made to Server")
+
+    def data_received(self, data):
+        self.higherProtocol().data_received(data)
+        print("Write got {} bytes of data to pass to lower layer".format(len(data)))
 
 class PassThrough2(StackingProtocol):
     def __init__(self):
         self.transport = None
 
-    def setHigherProtocol(self, higherProtocol=Protocol.ForgotPasswordClientProtocol()):
-        self._higherProtocol = higherProtocol
-        if self.count == 0:
-            self.higherProtocol().connection_made()
-            print("Connection made.")
-        elif self.count < 3:
-            self.higherProtocol().data_received()
-        else:
-            self.higherProtocol().connection_lost()
-        self.count += 1
+    def connection_made(self, transport):
+        self.transport = transport
+        print("Connection made to Client")
+        self.higherProtocol().connection_made(StackingTransport(transport))
+
+    def data_received(self, data):
+        self.higherProtocol().data_received(data)
+        print("Write got {} bytes of data to pass to lower layer".format(len(data)))
